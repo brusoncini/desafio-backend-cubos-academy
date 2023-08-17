@@ -1,9 +1,11 @@
-const express = require('express')
-const rotas = require('./rotas')
+const express = require("express");
+const rotas = require("./rotas");
 const app = express();
 
-app.use(rotas)
+app.use(express.json());
 
-app.listen('8000', () => {
-    console.log('Server online on port 8000 🚀');
-})
+app.use(rotas);
+
+app.listen("8000", () => {
+  console.log("Server online on port 8000 🚀");
+});

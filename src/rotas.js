@@ -10,8 +10,7 @@ const {validarSenha} = require('./intermediarios');
 const rotas = express();
 
 // CRUD contas
-rotas.use(validarSenha);
-rotas.get("/contas", listarContas);
+rotas.get("/contas", validarSenha, listarContas);
 rotas.post("/contas", criarConta);
 rotas.put("/contas/:numeroConta/usuario", atualizarConta);
 rotas.delete("/contas/:numeroConta", excluirConta);
