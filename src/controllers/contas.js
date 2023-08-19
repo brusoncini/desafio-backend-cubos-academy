@@ -1,4 +1,5 @@
 let { numero, saldo, contas } = require("../bancodedados");
+const { informacoesObrigatorias, contaExistente, procurarConta } = require("./funcoes");
 
 const listarContas = (req, res) => {
   res.json(contas);
@@ -8,22 +9,19 @@ const criarConta = (req, res) => {
   const { nome, cpf, data_nascimento, telefone, email, senha } = req.body;
 
   // verificações
-  if (!nome || !cpf || !data_nascimento || !telefone || !email || !senha) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todas as informações são obrigatórias." });
+  const validacaoInformacoes = informacoesObrigatorias(req);
+  if (validacaoInformacoes) {
+    return res.status(400).json(validacaoInformacoes);
   }
 
-  for (const conta of contas) {
-    if (conta.cpf === cpf || conta.email === email) {
-      return res.status(400).json({
-        mensagem: "Já existe uma conta com o cpf ou e-mail informado!",
-      });
-    }
+  const validacaoConta = contaExistente(req);
+  if (validacaoConta) {
+    return res.status(400).json(validacaoConta);
   }
+
   // cria uma nova conta
   const novaConta = {
-    numero: numero++,
+    numero: contas.length + 1,
     saldo: 0,
     nome,
     cpf,
@@ -43,45 +41,40 @@ const atualizarConta = (req, res) => {
   const { nome, cpf, data_nascimento, telefone, email, senha } = req.body;
 
   // verificações
-  if (!nome || !cpf || !data_nascimento || !telefone || !email || !senha) {
-    return res
-      .status(400)
-      .json({ mensagem: "Todas as informações são obrigatórias." });
+  const localizarConta = procurarConta(req);
+  if(!localizarConta) {
+    return res.status(404).json(localizarConta);
   }
 
-  for (const conta of contas) {
-    if (conta.cpf === cpf || conta.email === email) {
-      return res.status(400).json({
-        mensagem: "Já existe uma conta com o cpf ou e-mail informado!",
-      });
-    }
-  }
-
-  const conta = contas.find((conta) => {
-    return conta.numero === Number(numeroConta);
+  const encontrarUsuario = contas.find((conta) => {
+    return conta.nome === usuario;
   });
 
-  if (!conta) {
-    return res.status(404).json({ mensagem: "Conta não encontrada." });
-  }
-
-  const encontraUsuario = contas.find((conta) => {
-    return nome === usuario;
-  });
-
-  if (!encontraUsuario) {
+  if (!encontrarUsuario) {
     return res
       .status(404)
       .json({ mensagem: "Conta ou usuário não encontrados." });
   }
 
+  const validacaoInformacoes = informacoesObrigatorias(req);
+  if (validacaoInformacoes) {
+    return res.status(400).json(validacaoInformacoes);
+  }
+
+  const validacaoConta = contaExistente(req);
+  if (validacaoConta) {
+    return res.status(400).json(validacaoConta);
+  }
+
   // atualiza os dados
-  conta.nome = nome;
-  conta.cpf = cpf;
-  conta.data_nascimento = data_nascimento;
-  conta.telefone = telefone;
-  conta.email = email;
-  conta.senha = senha;
+  const contaAtualizada = {
+    nome,
+    cpf,
+    data_nascimento,
+    telefone,
+    email,
+    senha,
+  };
 
   return res.status(204).send();
 };
@@ -90,12 +83,9 @@ const excluirConta = (req, res) => {
   const { numeroConta } = req.params;
 
   // verifica se a conta informada existe
-  const conta = contas.find((conta) => {
-    return conta.numero === Number(numeroConta);
-  });
-
-  if (!conta) {
-    return res.status(404).json({ mensagem: "Conta não encontrada." });
+  const localizarConta = procurarConta(req);
+  if(!localizarConta) {
+    return res.status(404).json(localizarConta);
   }
 
   // verifica se o saldo é 0
@@ -105,10 +95,11 @@ const excluirConta = (req, res) => {
       .json({ mensagem: "A conta só pode ser removida se o saldo for zero!" });
   }
 
-  // filtra as contas que não tem o numero passado
-  contas = contas.filter((conta) => {
-    return conta.numero !== Number(numeroConta);
-  });
+  // retira a conta do array
+  contas.splice(
+    contas.findIndex((conta) => conta.numero === Number(numeroConta)),
+    1
+  );
 
   return res.status(204).send();
 };

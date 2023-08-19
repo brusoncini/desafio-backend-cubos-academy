@@ -5,6 +5,7 @@ const {
   atualizarConta,
   excluirConta,
 } = require("./controllers/contas");
+const { depositar, sacar, transferir, saldo, extrato } = require('./controllers/operacoes')
 const {validarSenha} = require('./intermediarios');
 
 const rotas = express();
@@ -16,10 +17,10 @@ rotas.put("/contas/:numeroConta/usuario", atualizarConta);
 rotas.delete("/contas/:numeroConta", excluirConta);
 
 // operações da conta
-// rotas.post("/transacoes/depositar", depositar);
+rotas.post("/transacoes/depositar", depositar);
 // rotas.post("/transacoes/sacar", sacar);
 // rotas.post("/transacoes/transferir", transferir);
-// rotas.get("/contas/saldo?numero_conta=123&senha=123", saldo);
-// rotas.get("/contas/extrato?numero_conta=123&senha=123", extrato);
+// rotas.get("/contas/saldo?numero_conta=123&senha=123", verificarSaldo);
+// rotas.get("/contas/extrato?numero_conta=123&senha=123", tirarExtrato);
 
 module.exports = rotas;
