@@ -1,5 +1,9 @@
-let { numero, saldo, contas } = require("../bancodedados");
-const { informacoesObrigatorias, contaExistente, procurarConta } = require("./funcoes");
+let { saldo, contas } = require("../bancodedados");
+const {
+  informacoesObrigatorias,
+  contaExistente,
+  procurarConta,
+} = require("./funcoes");
 
 const listarContas = (req, res) => {
   res.json(contas);
@@ -37,23 +41,12 @@ const criarConta = (req, res) => {
 };
 
 const atualizarConta = (req, res) => {
-  const { numeroConta, usuario } = req.params;
   const { nome, cpf, data_nascimento, telefone, email, senha } = req.body;
 
   // verificações
-  const localizarConta = procurarConta(req);
-  if(!localizarConta) {
-    return res.status(404).json(localizarConta);
-  }
-
-  const encontrarUsuario = contas.find((conta) => {
-    return conta.nome === usuario;
-  });
-
-  if (!encontrarUsuario) {
-    return res
-      .status(404)
-      .json({ mensagem: "Conta ou usuário não encontrados." });
+  const contaEncontrada = procurarConta(req);
+  if (!contaEncontrada) {
+    return res.status(404).json(contaEncontrada);
   }
 
   const validacaoInformacoes = informacoesObrigatorias(req);
@@ -80,12 +73,12 @@ const atualizarConta = (req, res) => {
 };
 
 const excluirConta = (req, res) => {
-  const { numeroConta } = req.params;
+  const { numeroConta } = req.query;
 
   // verifica se a conta informada existe
-  const localizarConta = procurarConta(req);
-  if(!localizarConta) {
-    return res.status(404).json(localizarConta);
+  const contaEncontrada = procurarConta(req);
+  if (!contaEncontrada) {
+    return res.status(404).json(contaEncontrada);
   }
 
   // verifica se o saldo é 0

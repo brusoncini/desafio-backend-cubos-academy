@@ -16,7 +16,8 @@ const contaExistente = (req) => {
   }
 };
 
-const procurarConta = () => {
+const procurarConta = (req) => {
+  const { numeroConta } = req.params;
   const encontrarConta = contas.find((conta) => {
     return conta.numero === Number(numeroConta);
   });
