@@ -3,7 +3,7 @@ const { contas } = require("../bancodedados");
 const informacoesObrigatorias = (req) => {
   const { nome, cpf, data_nascimento, telefone, email, senha } = req.body;
 
-  if (!nome || !cpf || !data_nascimento || !telefone || !email || !senha) {
+  if (!(nome && cpf && data_nascimento && telefone && email && senha)) {
     return { mensagem: "Todas as informações são obrigatórias." };
   }
 };
@@ -17,7 +17,7 @@ const contaExistente = (req) => {
 };
 
 const procurarConta = (req) => {
-  const { numeroConta } = req.params;
+  const { numeroConta } = req.query;
   const encontrarConta = contas.find((conta) => {
     return conta.numero === Number(numeroConta);
   });

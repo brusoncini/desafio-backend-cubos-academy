@@ -1,9 +1,5 @@
-let {
-  contas,
-  saques,
-  depositos,
-  transferencias,
-} = require("../bancodedados");
+let { contas, saques, depositos, transferencias } = require("../bancodedados");
+const { procurarConta } = require("./funcoes");
 
 const { format } = require("date-fns");
 
@@ -81,10 +77,10 @@ const sacar = (req, res) => {
 const transferir = (req, res) => {
   const { numero_conta_origem, numero_conta_destino, valor, senha } = req.body;
 
+  // verificações
   if (!numero_conta_origem || !numero_conta_destino || !valor || !senha) {
     return res.status(400).json({
-      mensagem:
-        "Todas as informações são obrigatórias.",
+      mensagem: "Todas as informações são obrigatórias.",
     });
   }
 
@@ -98,8 +94,7 @@ const transferir = (req, res) => {
 
   if (!contaOrigem || !contaDestino) {
     return res.status(400).json({
-      mensagem:
-        "A conta informada não existe.",
+      mensagem: "A conta informada não existe.",
     });
   }
 
@@ -107,12 +102,14 @@ const transferir = (req, res) => {
     return res.status(401).json({ mensagem: "A senha informada é inválida." });
   }
 
+  // verifica se a conta tem saldo
   if (Number(valor) > contaOrigem.saldo) {
-    return res
-      .status(400)
-      .json({ mensagem: "O saldo da conta deve ser maior do que o valor de saque." });
+    return res.status(400).json({
+      mensagem: "O saldo da conta deve ser maior do que o valor de saque.",
+    });
   }
 
+  // faz a transferencia
   contaOrigem.saldo -= Number(valor);
   contaDestino.saldo += Number(valor);
 
@@ -129,24 +126,14 @@ const transferir = (req, res) => {
 const verificarSaldo = (req, res) => {
   const { numero_conta, senha } = req.query;
 
-  if (!numero_conta || !senha) {
-    return res.status(400).json({
-      mensagem: "Todas as informações são obrigatórias",
-    });
+  const contaEncontrada = contas.find(conta => conta.numero === Number(numero_conta))
+  if(!contaEncontrada) {
+    return res.status(404).json({mensagem: 'a conta informada não existe.'})
   }
 
-  const contaEncontrada = contas.find((conta) => {
-    return conta.numero === Number(numero_conta);
-  });
-
-  if (!contaEncontrada) {
-    return res
-      .status(404)
-      .json({ mensagem: "A conta informada não existe." });
-  }
-
-  if (senha !== contaEncontrada.senha) {
-    return res.status(401).json({ mensagem: "A senha informada é inválida." });
+  const validarSenha = contas.find(conta => conta.senha === senha);
+  if (!validarSenha) {
+    return res.status(404).json({ mensagem: "a senha informada é inválida." });
   }
 
   res.status(200).json({ saldo: contaEncontrada.saldo });
@@ -166,9 +153,7 @@ const verificarExtrato = (req, res) => {
   });
 
   if (!contaEncontrada) {
-    return res
-      .status(404)
-      .json({ mensagem: "A conta informada não existe." });
+    return res.status(404).json({ mensagem: "A conta informada não existe." });
   }
 
   if (senha !== contaEncontrada.senha) {

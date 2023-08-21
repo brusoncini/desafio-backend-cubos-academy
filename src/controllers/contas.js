@@ -60,14 +60,12 @@ const atualizarConta = (req, res) => {
   }
 
   // atualiza os dados
-  const contaAtualizada = {
-    nome,
-    cpf,
-    data_nascimento,
-    telefone,
-    email,
-    senha,
-  };
+  contaEncontrada.nome = nome;
+  contaEncontrada.cpf = cpf;
+  contaEncontrada.data_nascimento = data_nascimento;
+  contaEncontrada.telefone = telefone;
+  contaEncontrada.email = email;
+  contaEncontrada.senha = senha;
 
   return res.status(204).send();
 };
@@ -76,7 +74,7 @@ const excluirConta = (req, res) => {
   const { numeroConta } = req.query;
 
   // verifica se a conta informada existe
-  const contaEncontrada = procurarConta(req);
+  let contaEncontrada = procurarConta(req);
   if (!contaEncontrada) {
     return res.status(404).json(contaEncontrada);
   }
@@ -90,7 +88,7 @@ const excluirConta = (req, res) => {
 
   // retira a conta do array
   contas.splice(
-    contas.findIndex((conta) => conta.numero === Number(numeroConta)),
+    contas.findIndex((conta) => conta.numero_conta === Number(numeroConta)),
     1
   );
 
